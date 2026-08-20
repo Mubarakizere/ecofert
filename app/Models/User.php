@@ -5,6 +5,7 @@ namespace App\Models;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
@@ -20,6 +21,7 @@ class User extends Authenticatable
      */
     protected $fillable = [
         'name',
+        'role_type',
         'email',
         'password',
     ];
@@ -46,4 +48,45 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    /**
+     * Get the waste logs for this user.
+     */
+    public function wasteLogs(): HasMany
+    {
+        return $this->hasMany(WasteLog::class);
+    }
+
+    /**
+     * Check if the user is an Admin.
+     */
+    public function isAdmin(): bool
+    {
+        return $this->role_type === 'Admin';
+    }
+
+    /**
+     * Check if the user is an Extension Officer.
+     */
+    public function isExtensionOfficer(): bool
+    {
+        return $this->role_type === 'Extension Officer';
+    }
+
+    /**
+     * Check if the user is a Household user.
+     */
+    public function isHousehold(): bool
+    {
+        return $this->role_type === 'Household';
+    }
+
+    /**
+     * Check if the user has admin panel access (Admin or Extension Officer).
+     */
+    public function hasAdminAccess(): bool
+    {
+        return in_array($this->role_type, ['Admin', 'Extension Officer']);
+    }
 }
+
