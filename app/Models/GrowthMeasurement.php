@@ -34,8 +34,8 @@ class GrowthMeasurement extends Model
     {
         return [
             'week_number' => 'integer',
-            'plant_height_cm' => 'decimal:2',
-            'soil_pH' => 'decimal:1',
+            'plant_height_cm' => 'float',
+            'soil_pH' => 'float',
         ];
     }
 

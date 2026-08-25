@@ -20,6 +20,8 @@ class WasteLog extends Model
     protected $fillable = [
         'user_id',
         'waste_type',
+        'quantity',
+        'unit',
         'date_recorded',
     ];
 
@@ -31,6 +33,7 @@ class WasteLog extends Model
     protected function casts(): array
     {
         return [
+            'quantity' => 'float',
             'date_recorded' => 'date',
         ];
     }
