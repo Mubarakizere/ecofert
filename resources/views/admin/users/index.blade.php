@@ -1,115 +1,202 @@
-<x-admin-layout>
+<x-app-layout>
     <x-slot name="header">
-        <div class="flex items-center justify-between">
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div>
-                <h2 class="font-heading text-2xl font-bold text-gray-800 tracking-wide">
-                    User Management
+                <h2 class="font-bold text-2xl text-slate-900 tracking-tight leading-tight">
+                    User Accounts & Platform Access
                 </h2>
-                <p class="text-sm text-gray-500 font-body mt-1">Manage system users, assign roles, and control platform access.</p>
+                <p class="text-sm text-slate-500 mt-1">
+                    Manage system user credentials, assign Spatie roles, and control access permissions.
+                </p>
             </div>
-            <a href="{{ route('admin.users.create') }}"
-               id="btn-create-user"
-               class="btn-gold inline-flex items-center gap-2 px-5 py-2.5 rounded-lg font-semibold text-sm transition-all duration-300">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M18 7.5v3m0 0v3m0-3h3m-3 0h-3m-2.25-4.125a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0ZM3 19.235v-.11a6.375 6.375 0 0 1 12.75 0v.109A12.318 12.318 0 0 1 9.374 21c-2.331 0-4.512-.645-6.374-1.766Z"/></svg>
-                New User
+            <a href="{{ route('admin.users.create') }}" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold rounded-lg shadow-sm transition">
+                + Provision New User
             </a>
         </div>
     </x-slot>
 
-    <div class="py-10">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <!-- Stats Bar -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+    <div class="py-8 bg-slate-50 min-h-screen">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
+
+            @if(session('success'))
+                <div class="p-4 bg-emerald-50 border-l-4 border-emerald-500 text-emerald-800 text-sm font-medium rounded-r-lg shadow-sm">
+                    {{ session('success') }}
+                </div>
+            @endif
+
+            <!-- Metric Summary Cards -->
+            <div class="grid grid-cols-1 sm:grid-cols-4 gap-6">
                 @php
                     $totalUsers = $users->count();
-                    $adminCount = $users->filter(fn($u) => $u->roles->pluck('name')->contains('Admin'))->count();
-                    $householdCount = $users->filter(fn($u) => $u->roles->pluck('name')->contains('Household'))->count();
+                    $householdCount = $users->where('role_type', 'Household')->count();
+                    $officerCount = $users->where('role_type', 'Extension Officer')->count();
+                    $adminCount = $users->where('role_type', 'Admin')->count();
                 @endphp
-                <div class="stat-card stat-card--emerald">
-                    <p class="section-label">Total Users</p>
-                    <p class="text-3xl font-heading font-bold text-emerald-700 mt-1">{{ $totalUsers }}</p>
+                <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
+                    <div>
+                        <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Total Accounts</span>
+                        <h3 class="text-3xl font-bold text-slate-900 mt-1">{{ $totalUsers }}</h3>
+                        <p class="text-xs text-slate-500 mt-1">Active platform users</p>
+                    </div>
+                    <div class="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center text-slate-700 font-bold text-sm">
+                        ALL
+                    </div>
                 </div>
-                <div class="stat-card stat-card--gold">
-                    <p class="section-label">Administrators</p>
-                    <p class="text-3xl font-heading font-bold text-amber-700 mt-1">{{ $adminCount }}</p>
+
+                <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
+                    <div>
+                        <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Households</span>
+                        <h3 class="text-3xl font-bold text-sky-700 mt-1">{{ $householdCount }}</h3>
+                        <p class="text-xs text-slate-500 mt-1">Home waste loggers</p>
+                    </div>
+                    <div class="w-10 h-10 rounded-xl bg-sky-50 flex items-center justify-center text-sky-700 font-bold text-sm">
+                        HH
+                    </div>
                 </div>
-                <div class="stat-card stat-card--amber">
-                    <p class="section-label">Household Members</p>
-                    <p class="text-3xl font-heading font-bold text-amber-600 mt-1">{{ $householdCount }}</p>
+
+                <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
+                    <div>
+                        <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Extension Officers</span>
+                        <h3 class="text-3xl font-bold text-amber-700 mt-1">{{ $officerCount }}</h3>
+                        <p class="text-xs text-slate-500 mt-1">Field advisors</p>
+                    </div>
+                    <div class="w-10 h-10 rounded-xl bg-amber-50 flex items-center justify-center text-amber-700 font-bold text-sm">
+                        EO
+                    </div>
+                </div>
+
+                <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
+                    <div>
+                        <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Administrators</span>
+                        <h3 class="text-3xl font-bold text-emerald-700 mt-1">{{ $adminCount }}</h3>
+                        <p class="text-xs text-slate-500 mt-1">System controllers</p>
+                    </div>
+                    <div class="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-700 font-bold text-sm">
+                        ADM
+                    </div>
                 </div>
             </div>
 
-            <!-- Users Table -->
-            <div class="card-dark overflow-hidden">
+            <!-- Search & Filter Card -->
+            <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
+                <form method="GET" action="{{ route('admin.users.index') }}" class="flex flex-col md:flex-row items-center gap-4">
+                    <div class="flex-1 w-full">
+                        <input type="text" name="search" value="{{ request('search') }}"
+                               placeholder="Search by user name or email..."
+                               class="w-full text-sm border-slate-300 rounded-lg shadow-sm focus:border-emerald-500 focus:ring-emerald-500">
+                    </div>
+
+                    <div class="w-full md:w-56">
+                        <select name="role" class="w-full text-sm border-slate-300 rounded-lg shadow-sm focus:border-emerald-500 focus:ring-emerald-500">
+                            <option value="">All Roles</option>
+                            <option value="Household" {{ request('role') === 'Household' ? 'selected' : '' }}>Household</option>
+                            <option value="Extension Officer" {{ request('role') === 'Extension Officer' ? 'selected' : '' }}>Extension Officer</option>
+                            <option value="Admin" {{ request('role') === 'Admin' ? 'selected' : '' }}>Admin</option>
+                        </select>
+                    </div>
+
+                    <div class="flex items-center gap-2 w-full md:w-auto">
+                        <button type="submit" class="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white font-semibold text-xs rounded-lg shadow-sm transition">
+                            Apply Filter
+                        </button>
+                        @if(request()->hasAny(['search', 'role']))
+                            <a href="{{ route('admin.users.index') }}" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 font-semibold text-xs rounded-lg transition">
+                                Clear
+                            </a>
+                        @endif
+                    </div>
+                </form>
+            </div>
+
+            <!-- Users Data Table Card -->
+            <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
                 @if($users->isEmpty())
-                    <div class="p-16 text-center">
-                        <div class="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center mx-auto mb-4">
-                            <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z"/>
-                            </svg>
+                    <div class="p-12 text-center space-y-3">
+                        <div class="w-12 h-12 rounded-xl bg-slate-100 flex items-center justify-center mx-auto text-slate-400 font-bold">
+                            UA
                         </div>
-                        <p class="text-gray-500 font-body text-lg">No users found in the system.</p>
-                        <a href="{{ route('admin.users.create') }}" class="inline-block mt-4 text-amber-600 hover:text-amber-700 text-sm font-semibold underline underline-offset-4 transition-colors">
-                            Create the first user →
-                        </a>
+                        <h3 class="text-base font-bold text-slate-900">No user accounts found</h3>
+                        <p class="text-xs text-slate-500 max-w-sm mx-auto">Try adjusting your search criteria or create a new user credential.</p>
                     </div>
                 @else
-                    <table class="w-full text-left" id="users-table">
-                        <thead>
-                            <tr class="border-b border-gray-200">
-                                <th class="px-6 py-4 text-xs font-body font-semibold uppercase tracking-wider text-gray-400">#</th>
-                                <th class="px-6 py-4 text-xs font-body font-semibold uppercase tracking-wider text-gray-400">Name</th>
-                                <th class="px-6 py-4 text-xs font-body font-semibold uppercase tracking-wider text-gray-400">Email</th>
-                                <th class="px-6 py-4 text-xs font-body font-semibold uppercase tracking-wider text-gray-400">Role</th>
-                                <th class="px-6 py-4 text-xs font-body font-semibold uppercase tracking-wider text-gray-400">Joined</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-gray-100">
-                            @foreach($users as $user)
-                                <tr class="row-glow">
-                                    <td class="px-6 py-5 text-sm text-gray-400 font-body">{{ $loop->iteration }}</td>
-                                    <td class="px-6 py-5">
-                                        <div class="flex items-center gap-3">
-                                            {{-- Avatar circle with initials --}}
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-sm text-slate-600">
+                            <thead class="bg-slate-50 text-xs uppercase font-semibold text-slate-500 border-b border-slate-200">
+                                <tr>
+                                    <th class="px-6 py-4">#</th>
+                                    <th class="px-6 py-4">User Details</th>
+                                    <th class="px-6 py-4">Email Address</th>
+                                    <th class="px-6 py-4">System Role</th>
+                                    <th class="px-6 py-4">Account Action</th>
+                                    <th class="px-6 py-4">Joined Date</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100">
+                                @foreach($users as $user)
+                                    <tr class="hover:bg-slate-50 transition">
+                                        <td class="px-6 py-4 text-xs font-mono text-slate-400">{{ $loop->iteration }}</td>
+                                        <td class="px-6 py-4">
+                                            <div class="flex items-center gap-3">
+                                                @if($user->avatar_url)
+                                                    <img src="{{ $user->avatar_url }}" alt="{{ $user->name }}" class="w-10 h-10 rounded-full object-cover border border-slate-300 shrink-0">
+                                                @else
+                                                    @php
+                                                        $badgeColor = match($user->role_type) {
+                                                            'Admin' => 'bg-emerald-700 text-white',
+                                                            'Extension Officer' => 'bg-amber-700 text-white',
+                                                            'Household' => 'bg-sky-700 text-white',
+                                                            default => 'bg-slate-700 text-white',
+                                                        };
+                                                    @endphp
+                                                    <div class="w-10 h-10 rounded-full {{ $badgeColor }} flex items-center justify-center text-xs font-bold font-mono shrink-0 shadow-sm">
+                                                        {{ $user->initials }}
+                                                    </div>
+                                                @endif
+                                                <div>
+                                                    <span class="font-bold text-slate-900 block leading-tight">{{ $user->name }}</span>
+                                                    <span class="text-[11px] text-slate-400 font-mono leading-tight">ID: #{{ $user->id }}</span>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="px-6 py-4 font-mono text-xs text-slate-700">{{ $user->email }}</td>
+                                        <td class="px-6 py-4">
                                             @php
-                                                $initials = collect(explode(' ', $user->name))->map(fn($w) => strtoupper(substr($w, 0, 1)))->take(2)->join('');
-                                                $roleName = $user->roles->first()?->name ?? 'Unknown';
-                                                $avatarColor = match($roleName) {
-                                                    'Admin' => 'bg-emerald-100 text-emerald-700',
-                                                    'Extension Officer' => 'bg-amber-100 text-amber-700',
-                                                    'Household' => 'bg-sky-100 text-sky-700',
-                                                    default => 'bg-gray-100 text-gray-600',
+                                                $roleBadge = match($user->role_type) {
+                                                    'Admin' => 'bg-emerald-50 text-emerald-800 border-emerald-200',
+                                                    'Extension Officer' => 'bg-amber-50 text-amber-800 border-amber-200',
+                                                    'Household' => 'bg-sky-50 text-sky-800 border-sky-200',
+                                                    default => 'bg-slate-50 text-slate-700 border-slate-200',
                                                 };
                                             @endphp
-                                            <div class="w-9 h-9 rounded-full {{ $avatarColor }} flex items-center justify-center text-xs font-bold font-body shrink-0">
-                                                {{ $initials }}
-                                            </div>
-                                            <span class="text-sm font-medium text-gray-800 font-body">{{ $user->name }}</span>
-                                        </div>
-                                    </td>
-                                    <td class="px-6 py-5 text-sm text-gray-500 font-body">{{ $user->email }}</td>
-                                    <td class="px-6 py-5">
-                                        @php
-                                            $badgeStyle = match($roleName) {
-                                                'Admin' => 'bg-emerald-50 text-emerald-700 border-emerald-200',
-                                                'Extension Officer' => 'bg-amber-50 text-amber-700 border-amber-200',
-                                                'Household' => 'bg-sky-50 text-sky-700 border-sky-200',
-                                                default => 'bg-gray-50 text-gray-600 border-gray-200',
-                                            };
-                                        @endphp
-                                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold border {{ $badgeStyle }}">
-                                            {{ $roleName }}
-                                        </span>
-                                    </td>
-                                    <td class="px-6 py-5 text-sm text-gray-400 font-body">
-                                        {{ $user->created_at->format('M d, Y') }}
-                                    </td>
-                                </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold border {{ $roleBadge }}">
+                                                {{ $user->role_type }}
+                                            </span>
+                                        </td>
+                                        <td class="px-6 py-4">
+                                            <form method="POST" action="{{ route('admin.users.update-role', $user) }}" class="flex items-center gap-2">
+                                                @csrf
+                                                @method('PATCH')
+                                                <select name="role_type" class="text-xs border-slate-300 rounded-md py-1 px-2 focus:border-emerald-500 focus:ring-emerald-500">
+                                                    <option value="Household" {{ $user->role_type === 'Household' ? 'selected' : '' }}>Household</option>
+                                                    <option value="Extension Officer" {{ $user->role_type === 'Extension Officer' ? 'selected' : '' }}>Extension Officer</option>
+                                                    <option value="Admin" {{ $user->role_type === 'Admin' ? 'selected' : '' }}>Admin</option>
+                                                </select>
+                                                <button type="submit" class="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-semibold rounded transition">
+                                                    Update
+                                                </button>
+                                            </form>
+                                        </td>
+                                        <td class="px-6 py-4 font-mono text-xs text-slate-400">
+                                            {{ $user->created_at->format('M d, Y') }}
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
                 @endif
             </div>
+
         </div>
     </div>
-</x-admin-layout>
+</x-app-layout>

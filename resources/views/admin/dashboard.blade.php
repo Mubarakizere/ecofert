@@ -1,122 +1,231 @@
-<x-admin-layout>
+<x-app-layout>
     <x-slot name="header">
-        <h2 class="font-heading text-2xl font-bold text-gray-800 tracking-wide">
-            Dashboard
-        </h2>
-        <p class="text-sm text-gray-500 font-body mt-1">Welcome back, {{ Auth::user()->name }}</p>
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <div>
+                <h2 class="font-bold text-2xl text-slate-900 tracking-tight leading-tight">
+                    System Administration Analytics Control
+                </h2>
+                <p class="text-sm text-slate-500 mt-1">
+                    Platform access, cooperative member metrics, and agricultural case study evaluation.
+                </p>
+            </div>
+            <div class="flex items-center gap-3">
+                <a href="{{ route('admin.users.create') }}" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold rounded-lg shadow-sm transition">
+                    Create User Account
+                </a>
+            </div>
+        </div>
     </x-slot>
 
-    <div class="py-8">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <!-- Include Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-            {{-- Stats Row --}}
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-5 mb-10">
-                <div class="stat-card stat-card--gold">
-                    <p class="section-label">Formulations</p>
-                    <p class="text-3xl font-heading font-bold text-amber-700 mt-2">{{ $formulationsCount }}</p>
-                    <p class="text-xs text-gray-400 mt-1 font-body">Approved recipes</p>
-                </div>
-                <div class="stat-card stat-card--emerald">
-                    <p class="section-label">Households</p>
-                    <p class="text-3xl font-heading font-bold text-emerald-700 mt-2">{{ $householdCount }}</p>
-                    <p class="text-xs text-gray-400 mt-1 font-body">Registered users</p>
-                </div>
-                <div class="stat-card stat-card--amber">
-                    <p class="section-label">Experiments</p>
-                    <p class="text-3xl font-heading font-bold text-amber-600 mt-2">{{ $experimentsCount }}</p>
-                    <p class="text-xs text-gray-400 mt-1 font-body">Field trials</p>
-                </div>
-            </div>
+    <div class="py-8 bg-slate-50 min-h-screen">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
 
-            {{-- Quick Actions --}}
-            <h3 class="section-label mb-4">Manage</h3>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-10">
-                <a href="{{ route('admin.formulations.index') }}" class="action-card group">
-                    <div class="flex items-start gap-4">
-                        <div class="w-10 h-10 rounded-lg bg-amber-50 flex items-center justify-center shrink-0">
-                            <svg class="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M9.75 3.104v5.714a2.25 2.25 0 0 1-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082m.75-.082a24.301 24.301 0 0 1 4.5 0m0 0v5.714c0 .597.237 1.17.659 1.591L19.8 15.3M14.25 3.104c.251.023.501.05.75.082M19.8 15.3l-1.57.393A9.065 9.065 0 0 1 12 15a9.065 9.065 0 0 0-6.23.693L5 14.5m14.8.8 1.402 1.402c1.232 1.232.65 3.318-1.067 3.611A48.309 48.309 0 0 1 12 21c-2.773 0-5.491-.235-8.135-.687-1.718-.293-2.3-2.379-1.067-3.61L5 14.5"/>
-                            </svg>
-                        </div>
-                        <div>
-                            <h4 class="font-body font-semibold text-gray-800 group-hover:text-amber-700 transition-colors">Formulations</h4>
-                            <p class="text-sm text-gray-500 mt-1 font-body leading-relaxed">Create and manage approved fertilizer preparation guides.</p>
-                        </div>
+            <!-- System Statistics Row -->
+            <div class="grid grid-cols-1 sm:grid-cols-4 gap-6">
+                <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
+                    <div>
+                        <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Total Accounts</span>
+                        <h3 class="text-3xl font-bold text-slate-900 mt-1">{{ $userCount }}</h3>
+                        <p class="text-xs text-slate-500 mt-1">Platform user credentials</p>
                     </div>
-                </a>
-
-                <div class="action-card action-card--disabled relative">
-                    <span class="absolute top-3 right-3 text-[0.6rem] font-body font-semibold uppercase tracking-widest text-gray-400 bg-gray-100 px-2 py-0.5 rounded">Soon</span>
-                    <div class="flex items-start gap-4">
-                        <div class="w-10 h-10 rounded-lg bg-emerald-50 flex items-center justify-center shrink-0">
-                            <svg class="w-5 h-5 text-emerald-500" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 5.25h.008v.008H12v-.008Z"/>
-                            </svg>
-                        </div>
-                        <div>
-                            <h4 class="font-body font-semibold text-gray-700">Experiments</h4>
-                            <p class="text-sm text-gray-400 mt-1 font-body leading-relaxed">Run 4-week comparative trials: organic vs. commercial.</p>
-                        </div>
+                    <div class="w-12 h-12 rounded-xl bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-700 font-bold">
+                        UA
                     </div>
                 </div>
 
-                <div class="action-card action-card--disabled relative">
-                    <span class="absolute top-3 right-3 text-[0.6rem] font-body font-semibold uppercase tracking-widest text-gray-400 bg-gray-100 px-2 py-0.5 rounded">Soon</span>
-                    <div class="flex items-start gap-4">
-                        <div class="w-10 h-10 rounded-lg bg-amber-50 flex items-center justify-center shrink-0">
-                            <svg class="w-5 h-5 text-amber-500" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75ZM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V8.625ZM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V4.125Z"/>
-                            </svg>
-                        </div>
-                        <div>
-                            <h4 class="font-body font-semibold text-gray-700">Growth Data</h4>
-                            <p class="text-sm text-gray-400 mt-1 font-body leading-relaxed">Record weekly plant height, soil pH, and leaf vitality.</p>
-                        </div>
+                <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
+                    <div>
+                        <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Households</span>
+                        <h3 class="text-3xl font-bold text-emerald-700 mt-1">{{ $householdCount }}</h3>
+                        <p class="text-xs text-slate-500 mt-1">Cooperative waste loggers</p>
+                    </div>
+                    <div class="w-12 h-12 rounded-xl bg-emerald-50 border border-emerald-100 flex items-center justify-center text-emerald-700 font-bold">
+                        HH
+                    </div>
+                </div>
+
+                <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
+                    <div>
+                        <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Extension Officers</span>
+                        <h3 class="text-3xl font-bold text-amber-700 mt-1">{{ $officerCount }}</h3>
+                        <p class="text-xs text-slate-500 mt-1">Agricultural advisors</p>
+                    </div>
+                    <div class="w-12 h-12 rounded-xl bg-amber-50 border border-amber-100 flex items-center justify-center text-amber-700 font-bold">
+                        EO
+                    </div>
+                </div>
+
+                <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
+                    <div>
+                        <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Total Waste Logged</span>
+                        <h3 class="text-3xl font-bold text-slate-900 mt-1">{{ $wasteAnalytics['totals']['aggregate'] }}<span class="text-sm font-normal text-slate-500">kg</span></h3>
+                        <p class="text-xs text-slate-500 mt-1">Valorised food waste</p>
+                    </div>
+                    <div class="w-12 h-12 rounded-xl bg-blue-50 border border-blue-100 flex items-center justify-center text-blue-700 font-bold">
+                        KG
                     </div>
                 </div>
             </div>
 
-            {{-- Recent Formulations --}}
-            @if($recentFormulations->isNotEmpty())
-                <h3 class="section-label mb-4">Recent formulations</h3>
-                <div class="card-dark overflow-hidden">
-                    <table class="w-full text-left">
-                        <thead>
-                            <tr class="border-b border-gray-200">
-                                <th class="px-5 py-3 text-xs font-body font-semibold uppercase tracking-wider text-gray-400">Waste Type</th>
-                                <th class="px-5 py-3 text-xs font-body font-semibold uppercase tracking-wider text-gray-400 hidden sm:table-cell">Preparation</th>
-                                <th class="px-5 py-3 text-xs font-body font-semibold uppercase tracking-wider text-gray-400 text-right">Updated</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-gray-100">
-                            @foreach($recentFormulations as $formulation)
-                                <tr class="row-glow">
-                                    <td class="px-5 py-3.5">
-                                        @php
-                                            $badge = match($formulation->target_waste_type) {
-                                                'Banana Peels' => 'bg-yellow-50 text-yellow-700 border-yellow-200',
-                                                'Eggshells' => 'bg-orange-50 text-orange-700 border-orange-200',
-                                                'Coffee Grounds' => 'bg-amber-50 text-amber-700 border-amber-200',
-                                                default => 'bg-gray-50 text-gray-600 border-gray-200',
-                                            };
-                                        @endphp
-                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold border {{ $badge }}">
-                                            {{ $formulation->target_waste_type }}
-                                        </span>
-                                    </td>
-                                    <td class="px-5 py-3.5 text-sm text-gray-600 font-body max-w-xs hidden sm:table-cell">
-                                        <p class="line-clamp-1">{{ $formulation->preparation_steps }}</p>
-                                    </td>
-                                    <td class="px-5 py-3.5 text-sm text-gray-400 font-body text-right">
-                                        {{ $formulation->updated_at->diffForHumans() }}
-                                    </td>
-                                </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
+            <!-- Analytics Charts Grid (Row 1) -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                
+                <!-- Chart 1: Food Waste Collection Breakdown -->
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 space-y-4">
+                    <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                        <div>
+                            <h3 class="text-base font-bold text-slate-900">Food Waste Valorisation by Material Type</h3>
+                            <p class="text-xs text-slate-500">Musanze/Nyabihu district cooperative waste deposits (kg)</p>
+                        </div>
+                        <span class="text-xs font-mono font-semibold px-2 py-1 bg-slate-100 text-slate-700 rounded">
+                            Aggregate: {{ $wasteAnalytics['totals']['aggregate'] }}kg
+                        </span>
+                    </div>
+
+                    <div class="h-64 relative flex items-center justify-center">
+                        <canvas id="wasteChart"></canvas>
+                    </div>
+
+                    <div class="grid grid-cols-3 gap-2 pt-2 text-center text-xs border-t border-slate-100">
+                        <div class="p-2 rounded bg-amber-50 border border-amber-100">
+                            <span class="text-amber-800 font-bold block">{{ $wasteAnalytics['totals']['banana'] }} kg</span>
+                            <span class="text-slate-500">Banana Peels (K)</span>
+                        </div>
+                        <div class="p-2 rounded bg-stone-50 border border-stone-200">
+                            <span class="text-stone-800 font-bold block">{{ $wasteAnalytics['totals']['eggshell'] }} kg</span>
+                            <span class="text-slate-500">Eggshells (Ca)</span>
+                        </div>
+                        <div class="p-2 rounded bg-emerald-50 border border-emerald-100">
+                            <span class="text-emerald-800 font-bold block">{{ $wasteAnalytics['totals']['coffee'] }} kg</span>
+                            <span class="text-slate-500">Coffee Grounds (N)</span>
+                        </div>
+                    </div>
                 </div>
-            @endif
+
+                <!-- Chart 2: 4-Week Growth Trajectory Comparison -->
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 space-y-4">
+                    <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                        <div>
+                            <h3 class="text-base font-bold text-slate-900">4-Week Plant Growth Trajectory</h3>
+                            <p class="text-xs text-slate-500">Average plant height progression: Organic vs Commercial Control (cm)</p>
+                        </div>
+                        <span class="text-xs font-mono font-semibold px-2 py-1 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded">
+                            Trial Comparison
+                        </span>
+                    </div>
+
+                    <div class="h-64 relative">
+                        <canvas id="growthChart"></canvas>
+                    </div>
+
+                    <div class="flex items-center justify-around text-xs text-slate-600 pt-2 border-t border-slate-100">
+                        <div class="flex items-center gap-2">
+                            <span class="w-3 h-3 rounded-full bg-emerald-600"></span>
+                            <span>Homemade Organic Fertilizer</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="w-3 h-3 rounded-full bg-slate-400"></span>
+                            <span>Commercial Fertilizer Control</span>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Quick Management Navigation Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 flex items-center justify-between">
+                    <div>
+                        <h3 class="text-base font-bold text-slate-900">User Account Provisioning & Roles</h3>
+                        <p class="text-xs text-slate-500 mt-1">Manage user credentials, grant Spatie roles, and inspect system permissions.</p>
+                    </div>
+                    <a href="{{ route('admin.users.index') }}" class="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold rounded-lg shadow-sm transition">
+                        Manage Users &rarr;
+                    </a>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 flex items-center justify-between">
+                    <div>
+                        <h3 class="text-base font-bold text-slate-900">Cooperative Farmer Experiments Log</h3>
+                        <p class="text-xs text-slate-500 mt-1">Review plant trial measurements and height delta reports across member gardens.</p>
+                    </div>
+                    <a href="{{ route('officer.experiments.index') }}" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded-lg shadow-sm transition">
+                        Review Trials &rarr;
+                    </a>
+                </div>
+            </div>
 
         </div>
     </div>
-</x-admin-layout>
+
+    <!-- Initialize Chart.js Scripts -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Chart 1: Food Waste Doughnut
+            const wasteCtx = document.getElementById('wasteChart').getContext('2d');
+            new Chart(wasteCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: {!! json_encode($wasteAnalytics['labels']) !!},
+                    datasets: [{
+                        data: {!! json_encode($wasteAnalytics['data']) !!},
+                        backgroundColor: ['#f59e0b', '#78716c', '#059669'],
+                        borderWidth: 2,
+                        borderColor: '#ffffff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom', labels: { font: { size: 11, family: 'Inter' } } }
+                    }
+                }
+            });
+
+            // Chart 2: Growth Trajectory Multi-Line Chart
+            const growthCtx = document.getElementById('growthChart').getContext('2d');
+            new Chart(growthCtx, {
+                type: 'line',
+                data: {
+                    labels: {!! json_encode($growthAnalytics['labels']) !!},
+                    datasets: [
+                        {
+                            label: 'Organic Fertilizer (cm)',
+                            data: {!! json_encode($growthAnalytics['organic']) !!},
+                            borderColor: '#059669',
+                            backgroundColor: 'rgba(5, 150, 105, 0.1)',
+                            borderWidth: 3,
+                            fill: true,
+                            tension: 0.3
+                        },
+                        {
+                            label: 'Commercial Control (cm)',
+                            data: {!! json_encode($growthAnalytics['commercial']) !!},
+                            borderColor: '#94a3b8',
+                            backgroundColor: 'rgba(148, 163, 184, 0.1)',
+                            borderWidth: 2,
+                            borderDash: [5, 5],
+                            fill: false,
+                            tension: 0.3
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: { beginAtZero: true, title: { display: true, text: 'Plant Height (cm)', font: { size: 11 } } },
+                        x: { title: { display: true, text: 'Trial Duration', font: { size: 11 } } }
+                    },
+                    plugins: {
+                        legend: { display: false }
+                    }
+                }
+            });
+        });
+    </script>
+</x-app-layout>

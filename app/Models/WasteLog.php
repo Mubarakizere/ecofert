@@ -23,6 +23,7 @@ class WasteLog extends Model
         'quantity',
         'unit',
         'date_recorded',
+        'transaction_type',
     ];
 
     /**

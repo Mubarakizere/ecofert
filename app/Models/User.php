@@ -24,8 +24,22 @@ class User extends Authenticatable
         'name',
         'role_type',
         'email',
+        'avatar',
         'password',
     ];
+
+    public function getAvatarUrlAttribute(): ?string
+    {
+        return $this->avatar ? asset('storage/' . $this->avatar) : null;
+    }
+
+    public function getInitialsAttribute(): string
+    {
+        return collect(explode(' ', $this->name))
+            ->map(fn($w) => strtoupper(substr($w, 0, 1)))
+            ->take(2)
+            ->join('');
+    }
 
     /**
      * The attributes that should be hidden for serialization.
@@ -64,6 +78,30 @@ class User extends Authenticatable
     public function experiments(): HasMany
     {
         return $this->hasMany(Experiment::class, 'user_id', 'id');
+    }
+
+    /**
+     * Get the user's waste stock balances.
+     */
+    public function wasteStocks(): HasMany
+    {
+        return $this->hasMany(UserWasteStock::class);
+    }
+
+    /**
+     * Get the user's AI chat messages.
+     */
+    public function aiChatMessages(): HasMany
+    {
+        return $this->hasMany(AiChatMessage::class);
+    }
+
+    /**
+     * Get the user's fertilizer batches.
+     */
+    public function fertilizerBatches(): HasMany
+    {
+        return $this->hasMany(FertilizerBatch::class);
     }
 
     /**

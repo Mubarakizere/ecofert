@@ -3,7 +3,7 @@
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
                 <h2 class="font-heading text-2xl sm:text-3xl font-bold text-gray-800 tracking-wide">
-                    Waste Logging & Recommendations
+                    Waste Inventory & Production
                 </h2>
                 <p class="text-sm text-gray-500 font-body mt-1">
                     Welcome back, <span class="font-semibold text-emerald-700">{{ Auth::user()->name }}</span> &middot; Home Gardener Dashboard
@@ -11,15 +11,15 @@
             </div>
             <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-semibold font-body">
                 <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                Log Waste Permission Active
+                Inventory Active
             </div>
         </div>
     </x-slot>
 
-    <div class="py-8">
+    <div class="py-8 relative" x-data="{ chatOpen: false, chatMessages: [], chatInput: '', sending: false }">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
 
-            {{-- ── Banner Notice (no formulation found fallback) ────────────────── --}}
+            {{-- ── Banner Notice ────────────────── --}}
             @if(session('info'))
                 <div class="rounded-xl border border-amber-200 bg-amber-50/90 p-4 text-amber-800 text-sm flex items-center gap-3 shadow-sm">
                     <div class="w-8 h-8 rounded-lg bg-amber-100 flex items-center justify-center shrink-0">
@@ -34,312 +34,191 @@
                 </div>
             @endif
 
-            {{-- ── Recommendation Hero Card (Shown dynamically after submission) ── --}}
-            @if(session('recommendation'))
+            {{-- ── AI Recipe Generation Card ── --}}
+            @if(session('ai_recipe'))
                 @php
-                    /** @var \App\Models\ApprovedFormulation $rec */
-                    $rec = session('recommendation');
-                    $loggedType = session('logged_waste_type');
-                    $theme = match($loggedType) {
-                        'Banana Peels'   => ['bg' => 'bg-yellow-500', 'border' => 'border-yellow-200', 'badge' => 'bg-yellow-100 text-yellow-800 border-yellow-300', 'accent' => 'text-yellow-700', 'icon' => '🍌'],
-                        'Eggshells'      => ['bg' => 'bg-orange-500', 'border' => 'border-orange-200', 'badge' => 'bg-orange-100 text-orange-800 border-orange-300', 'accent' => 'text-orange-700', 'icon' => '🥚'],
-                        'Coffee Grounds' => ['bg' => 'bg-amber-600',  'border' => 'border-amber-200',  'badge' => 'bg-amber-100  text-amber-800  border-amber-300',  'accent' => 'text-amber-700',  'icon' => '☕'],
-                        default          => ['bg' => 'bg-emerald-600','border' => 'border-emerald-200','badge' => 'bg-emerald-100 text-emerald-800 border-emerald-300','accent' => 'text-emerald-700','icon' => '🌱'],
-                    };
+                    $recipeData = session('ai_recipe');
                 @endphp
-
-                <div class="card-dark overflow-hidden border-2 border-emerald-500/80 shadow-lg relative">
-                    <!-- Top Ribbon Header -->
+                <div class="card-dark overflow-hidden border-2 border-emerald-500/80 shadow-lg relative bg-white">
                     <div class="bg-gradient-to-r from-emerald-900 via-emerald-800 to-teal-900 p-6 text-white relative overflow-hidden">
-                        <div class="absolute right-0 top-0 translate-x-4 -translate-y-4 opacity-10 text-8xl pointer-events-none select-none">
-                            {{ $theme['icon'] }}
-                        </div>
-                        <div class="flex flex-wrap items-center justify-between gap-4 relative z-10">
-                            <div class="flex items-center gap-3.5">
-                                <div class="w-12 h-12 rounded-xl bg-emerald-700/80 border border-emerald-500/50 flex items-center justify-center text-2xl shrink-0 shadow-inner">
-                                    {{ $theme['icon'] }}
-                                </div>
-                                <div>
-                                    <div class="flex items-center gap-2">
-                                        <span class="text-[0.65rem] font-bold uppercase tracking-widest bg-emerald-500/30 text-emerald-200 px-2 py-0.5 rounded">
-                                            Instant Matched Guide
-                                        </span>
-                                        <span class="text-xs text-emerald-300 font-body">Recorded Today</span>
-                                    </div>
-                                    <h3 class="font-heading text-xl sm:text-2xl font-bold text-white mt-1">
-                                        Fertilizer Recipe for {{ $loggedType }}
-                                    </h3>
-                                </div>
+                        <div class="flex items-center justify-between relative z-10">
+                            <div>
+                                <span class="text-[0.65rem] font-bold uppercase tracking-widest bg-emerald-500/30 text-emerald-200 px-2 py-0.5 rounded">
+                                    AI Generated Mix
+                                </span>
+                                <h3 class="font-heading text-xl sm:text-2xl font-bold text-white mt-1">
+                                    Custom Fertilizer Recipe
+                                </h3>
                             </div>
-                            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border {{ $theme['badge'] }}">
-                                <span>Target:</span> {{ $loggedType }}
-                            </span>
+                            <form method="POST" action="{{ route('household.waste-logs.produce') }}">
+                                @csrf
+                                @if(isset($recipeData['used']) && is_array($recipeData['used']))
+                                    @foreach($recipeData['used'] as $i => $item)
+                                        <input type="hidden" name="used[{{ $i }}][waste_type]" value="{{ $item['waste_type'] }}">
+                                        <input type="hidden" name="used[{{ $i }}][quantity]" value="{{ $item['quantity'] }}">
+                                    @endforeach
+                                @endif
+                                <button type="submit" class="btn-gold px-5 py-2.5 rounded-xl font-bold tracking-wide shadow-md hover:shadow-lg transition flex items-center gap-2">
+                                    <svg class="w-5 h-5 text-amber-200" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75m-3-7.036A11.959 11.959 0 0 1 3.598 6 11.99 11.99 0 0 0 3 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285Z" />
+                                    </svg>
+                                    Confirm &amp; Deduct Stock
+                                </button>
+                            </form>
                         </div>
                     </div>
-
-                    <!-- Formulation Details Grid -->
-                    <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-6 bg-white">
-                        {{-- Preparation Steps --}}
-                        <div class="rounded-xl bg-gray-50 border border-gray-200/80 p-5 flex flex-col justify-between hover:border-gray-300 transition-all">
-                            <div>
-                                <div class="flex items-center gap-2 mb-3">
-                                    <div class="w-7 h-7 rounded-lg bg-amber-100 flex items-center justify-center text-amber-700 font-bold text-xs">
-                                        1
-                                    </div>
-                                    <h4 class="font-body font-semibold text-gray-800 text-sm uppercase tracking-wide">
-                                        Preparation Steps
-                                    </h4>
-                                </div>
-                                <div class="text-sm text-gray-700 font-body leading-relaxed whitespace-pre-line bg-white rounded-lg p-4 border border-gray-100 shadow-2xs">
-                                    {{ $rec->preparation_steps }}
-                                </div>
-                            </div>
-                            <div class="mt-4 pt-3 border-t border-gray-200/60 flex items-center justify-between text-xs text-gray-400 font-body">
-                                <span>Prep Time: ~10 mins</span>
-                                <span class="text-emerald-600 font-medium">Step-by-Step Guide</span>
-                            </div>
+                    <div class="p-6">
+                        <div class="text-sm text-gray-800 font-body leading-relaxed whitespace-pre-line bg-gray-50 rounded-lg p-5 border border-gray-200 shadow-inner">
+                            {{ $recipeData['recipe'] ?? 'No recipe details provided.' }}
                         </div>
-
-                        {{-- Application Guidance --}}
-                        <div class="rounded-xl bg-emerald-50/60 border border-emerald-200/80 p-5 flex flex-col justify-between hover:border-emerald-300 transition-all">
-                            <div>
-                                <div class="flex items-center gap-2 mb-3">
-                                    <div class="w-7 h-7 rounded-lg bg-emerald-600 flex items-center justify-center text-white font-bold text-xs">
-                                        2
-                                    </div>
-                                    <h4 class="font-body font-semibold text-emerald-900 text-sm uppercase tracking-wide">
-                                        Application Guidance
-                                    </h4>
-                                </div>
-                                <div class="text-sm text-emerald-950 font-body leading-relaxed whitespace-pre-line bg-white/90 rounded-lg p-4 border border-emerald-100 shadow-2xs">
-                                    {{ $rec->application_guidance }}
-                                </div>
-                            </div>
-                            <div class="mt-4 pt-3 border-t border-emerald-200/60 flex items-center justify-between text-xs text-emerald-700 font-body">
-                                <span>Optimal Frequency: Weekly</span>
-                                <span class="font-semibold text-emerald-700">Ready to Apply</span>
+                        
+                        <div class="mt-5 border-t border-gray-100 pt-5">
+                            <h4 class="text-xs font-bold uppercase tracking-wider text-gray-500 mb-3">Stock to be Used:</h4>
+                            <div class="flex flex-wrap gap-3">
+                                @if(isset($recipeData['used']) && is_array($recipeData['used']))
+                                    @foreach($recipeData['used'] as $item)
+                                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold border bg-emerald-50 text-emerald-800 border-emerald-200">
+                                            {{ $item['quantity'] }}kg of {{ $item['waste_type'] }}
+                                        </span>
+                                    @endforeach
+                                @endif
                             </div>
                         </div>
                     </div>
                 </div>
             @endif
 
-            {{-- ── Main Two-Column Layout: Record Waste (Left) + Waste History (Right) ── --}}
+            {{-- ── Main Two-Column Layout ── --}}
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
 
-                {{-- ── Left Column: Waste Submission Form (5 cols) ──────────────── --}}
-                @if(Auth::user()->can('log_waste') || Auth::user()->isHousehold())
+                {{-- ── Left Column: Stock & Submission (5 cols) ──────────────── --}}
                 <div class="lg:col-span-5 space-y-6">
-                    <div class="card-dark p-6">
+                    
+                    {{-- Current Stock Dashboard --}}
+                    <div class="card-dark p-6 border-t-4 border-emerald-500">
                         <div class="flex items-center justify-between mb-5">
                             <div>
-                                <p class="section-label">Action</p>
-                                <h3 class="font-heading text-xl font-bold text-gray-800 mt-0.5">Record Kitchen Waste</h3>
+                                <p class="section-label">Inventory</p>
+                                <h3 class="font-heading text-xl font-bold text-gray-800 mt-0.5">My Current Stock</h3>
                             </div>
-                            <span class="w-8 h-8 rounded-lg bg-amber-50 flex items-center justify-center text-amber-600">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>
-                                </svg>
-                            </span>
+                            <form method="POST" action="{{ route('household.waste-logs.recipe') }}">
+                                @csrf
+                                <button type="submit" class="p-2 bg-emerald-100 text-emerald-700 rounded-lg hover:bg-emerald-200 transition" title="Generate Recipe from Stock">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09ZM18.259 8.715 18 9.75l-.259-1.035a3.375 3.375 0 0 0-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 0 0 2.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 0 0 2.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 0 0-2.456 2.456ZM16.894 20.567 16.5 21.75l-.394-1.183a2.25 2.25 0 0 0-1.428-1.428L13.5 18.75l1.183-.394a2.25 2.25 0 0 0 1.428-1.428l.394-1.183.394 1.183a2.25 2.25 0 0 0 1.428 1.428l1.183.394-1.183.394a2.25 2.25 0 0 0-1.428 1.428Z" />
+                                    </svg>
+                                </button>
+                            </form>
                         </div>
-
-                        <form method="POST" action="{{ route('household.waste-logs.store') }}" id="waste-log-form">
+                        
+                        <div class="grid grid-cols-3 gap-3">
+                            <div class="stat-card stat-card--gold p-4 text-center rounded-xl bg-white border border-gray-200 shadow-2xs">
+                                <span class="text-xl">🍌</span>
+                                <p class="text-2xl font-heading font-bold text-amber-700 mt-1">{{ number_format(isset($wasteStocks['Banana Peels']) ? $wasteStocks['Banana Peels']->quantity : 0, 1) }}<span class="text-xs">kg</span></p>
+                                <p class="text-[0.62rem] text-gray-400 font-body font-semibold uppercase tracking-wider mt-0.5">Banana Peels</p>
+                            </div>
+                            <div class="stat-card stat-card--emerald p-4 text-center rounded-xl bg-white border border-gray-200 shadow-2xs">
+                                <span class="text-xl">🥚</span>
+                                <p class="text-2xl font-heading font-bold text-emerald-700 mt-1">{{ number_format(isset($wasteStocks['Eggshells']) ? $wasteStocks['Eggshells']->quantity : 0, 1) }}<span class="text-xs">kg</span></p>
+                                <p class="text-[0.62rem] text-gray-400 font-body font-semibold uppercase tracking-wider mt-0.5">Eggshells</p>
+                            </div>
+                            <div class="stat-card stat-card--amber p-4 text-center rounded-xl bg-white border border-gray-200 shadow-2xs">
+                                <span class="text-xl">☕</span>
+                                <p class="text-2xl font-heading font-bold text-amber-600 mt-1">{{ number_format(isset($wasteStocks['Coffee Grounds']) ? $wasteStocks['Coffee Grounds']->quantity : 0, 1) }}<span class="text-xs">kg</span></p>
+                                <p class="text-[0.62rem] text-gray-400 font-body font-semibold uppercase tracking-wider mt-0.5">Coffee Grounds</p>
+                            </div>
+                        </div>
+                        
+                        <form method="POST" action="{{ route('household.waste-logs.recipe') }}" class="mt-4">
                             @csrf
-
-                            {{-- Visual Choice Cards for Waste Type --}}
-                            <div class="mb-5">
-                                <label class="block text-xs font-semibold uppercase tracking-wider text-gray-500 font-body mb-3">
-                                    Select Organic Waste Type
-                                </label>
-
-                                <div class="space-y-3" x-data="{ selectedType: '{{ old('waste_type', 'Banana Peels') }}' }">
-                                    {{-- Banana Peels --}}
-                                    <label 
-                                        @click="selectedType = 'Banana Peels'"
-                                        :class="selectedType === 'Banana Peels' ? 'border-amber-500 bg-amber-50/50 ring-1 ring-amber-400' : 'border-gray-200 bg-white hover:border-gray-300'"
-                                        class="flex items-center justify-between p-3.5 rounded-xl border cursor-pointer transition-all duration-150"
-                                    >
-                                        <div class="flex items-center gap-3">
-                                            <span class="text-2xl p-2 rounded-lg bg-yellow-100/80">🍌</span>
-                                            <div>
-                                                <p class="font-body font-semibold text-sm text-gray-800">Banana Peels</p>
-                                                <p class="text-xs text-gray-500 font-body">Rich in Potassium (K) &amp; Phosphorus</p>
-                                            </div>
-                                        </div>
-                                        <input 
-                                            type="radio" 
-                                            name="waste_type" 
-                                            value="Banana Peels" 
-                                            x-model="selectedType" 
-                                            class="w-4 h-4 text-emerald-600 focus:ring-emerald-500 border-gray-300"
-                                        >
-                                    </label>
-
-                                    {{-- Eggshells --}}
-                                    <label 
-                                        @click="selectedType = 'Eggshells'"
-                                        :class="selectedType === 'Eggshells' ? 'border-orange-500 bg-orange-50/50 ring-1 ring-orange-400' : 'border-gray-200 bg-white hover:border-gray-300'"
-                                        class="flex items-center justify-between p-3.5 rounded-xl border cursor-pointer transition-all duration-150"
-                                    >
-                                        <div class="flex items-center gap-3">
-                                            <span class="text-2xl p-2 rounded-lg bg-orange-100/80">🥚</span>
-                                            <div>
-                                                <p class="font-body font-semibold text-sm text-gray-800">Eggshells</p>
-                                                <p class="text-xs text-gray-500 font-body">High Calcium (Ca) for root strength</p>
-                                            </div>
-                                        </div>
-                                        <input 
-                                            type="radio" 
-                                            name="waste_type" 
-                                            value="Eggshells" 
-                                            x-model="selectedType" 
-                                            class="w-4 h-4 text-emerald-600 focus:ring-emerald-500 border-gray-300"
-                                        >
-                                    </label>
-
-                                    {{-- Coffee Grounds --}}
-                                    <label 
-                                        @click="selectedType = 'Coffee Grounds'"
-                                        :class="selectedType === 'Coffee Grounds' ? 'border-amber-700 bg-amber-50/70 ring-1 ring-amber-600' : 'border-gray-200 bg-white hover:border-gray-300'"
-                                        class="flex items-center justify-between p-3.5 rounded-xl border cursor-pointer transition-all duration-150"
-                                    >
-                                        <div class="flex items-center gap-3">
-                                            <span class="text-2xl p-2 rounded-lg bg-amber-100/80">☕</span>
-                                            <div>
-                                                <p class="font-body font-semibold text-sm text-gray-800">Coffee Grounds</p>
-                                                <p class="text-xs text-gray-500 font-body">Nitrogen Booster (N) &amp; Soil Aeration</p>
-                                            </div>
-                                        </div>
-                                        <input 
-                                            type="radio" 
-                                            name="waste_type" 
-                                            value="Coffee Grounds" 
-                                            x-model="selectedType" 
-                                            class="w-4 h-4 text-emerald-600 focus:ring-emerald-500 border-gray-300"
-                                        >
-                                    </label>
-                                </div>
-
-                                @error('waste_type')
-                                    <p class="mt-2 text-xs text-red-600 font-body">{{ $message }}</p>
-                                @enderror
-                            </div>
-
-                            {{-- Quantity & Unit Inputs --}}
-                            <div class="mb-5 grid grid-cols-3 gap-3">
-                                <div class="col-span-2">
-                                    <label for="quantity" class="block text-xs font-semibold uppercase tracking-wider text-gray-500 font-body mb-1.5">
-                                        Quantity / Amount
-                                    </label>
-                                    <input
-                                        id="quantity"
-                                        type="number"
-                                        name="quantity"
-                                        step="0.01"
-                                        min="0.01"
-                                        max="9999.99"
-                                        value="{{ old('quantity') }}"
-                                        placeholder="e.g. 0.50"
-                                        class="w-full rounded-xl border border-gray-200 bg-white px-3.5 py-2.5 text-sm font-body text-gray-800 shadow-2xs focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:border-transparent transition-all @error('quantity') border-red-400 @enderror"
-                                    >
-                                    @error('quantity')
-                                        <p class="mt-1 text-xs text-red-600 font-body">{{ $message }}</p>
-                                    @enderror
-                                </div>
-
-                                <div>
-                                    <label for="unit" class="block text-xs font-semibold uppercase tracking-wider text-gray-500 font-body mb-1.5">
-                                        Unit
-                                    </label>
-                                    <select
-                                        id="unit"
-                                        name="unit"
-                                        class="w-full rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm font-body text-gray-800 shadow-2xs focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:border-transparent transition-all @error('unit') border-red-400 @enderror"
-                                    >
-                                        <option value="kg" {{ old('unit') === 'kg' ? 'selected' : '' }}>kg</option>
-                                        <option value="g" {{ old('unit') === 'g' ? 'selected' : '' }}>g</option>
-                                        <option value="items" {{ old('unit') === 'items' ? 'selected' : '' }}>items</option>
-                                    </select>
-                                    @error('unit')
-                                        <p class="mt-1 text-xs text-red-600 font-body">{{ $message }}</p>
-                                    @enderror
-                                </div>
-                            </div>
-
-                            {{-- Date Indicator --}}
-                            <div class="mb-6">
-                                <label class="block text-xs font-semibold uppercase tracking-wider text-gray-500 font-body mb-1.5">
-                                    Date Recorded
-                                </label>
-                                <div class="flex items-center justify-between rounded-xl border border-gray-200 bg-gray-50 px-4 py-2.5 text-sm font-body text-gray-700">
-                                    <span class="flex items-center gap-2">
-                                        <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5"/>
-                                        </svg>
-                                        {{ now()->format('l, d M Y') }}
-                                    </span>
-                                    <span class="text-xs text-gray-400 font-medium">Automatic</span>
-                                </div>
-                            </div>
-
-                            {{-- Submit CTA --}}
-                            <button
-                                type="submit"
-                                class="btn-gold w-full rounded-xl px-5 py-3 text-sm font-body font-semibold tracking-wide flex items-center justify-center gap-2 shadow-md hover:shadow-lg transition-all"
-                            >
-                                <svg class="w-4 h-4 text-amber-200" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9.75 3.104v5.714a2.25 2.25 0 0 1-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082m.75-.082a24.301 24.301 0 0 1 4.5 0m0 0v5.714c0 .597.237 1.17.659 1.591L19.8 15.3M14.25 3.104c.251.023.501.05.75.082M19.8 15.3l-1.57.393A9.065 9.065 0 0 1 12 15a9.065 9.065 0 0 0-6.23.693L5 14.5"/>
-                                </svg>
-                                Log Waste &amp; Get Formulation
+                            <button type="submit" class="w-full btn-gold rounded-xl px-4 py-2 text-sm font-bold shadow transition flex justify-center items-center gap-2">
+                                Generate AI Recipe from Stock
                             </button>
                         </form>
                     </div>
 
-                    {{-- Waste Breakdown Stat Cards --}}
-                    @php
-                        $counts = $wasteLogs->groupBy('waste_type')->map->count();
-                    @endphp
-                    <div class="grid grid-cols-3 gap-3">
-                        <div class="stat-card stat-card--gold p-4 text-center rounded-xl bg-white border border-gray-200 shadow-2xs">
-                            <span class="text-xl">🍌</span>
-                            <p class="text-2xl font-heading font-bold text-amber-700 mt-1">{{ $counts->get('Banana Peels', 0) }}</p>
-                            <p class="text-[0.62rem] text-gray-400 font-body font-semibold uppercase tracking-wider mt-0.5">Banana Peels</p>
+                    {{-- Record Waste Form --}}
+                    @if(Auth::user()->can('log_waste'))
+                    <div class="card-dark p-6">
+                        <div class="flex items-center justify-between mb-5">
+                            <div>
+                                <p class="section-label">Action</p>
+                                <h3 class="font-heading text-xl font-bold text-gray-800 mt-0.5">Log New Kitchen Waste</h3>
+                            </div>
                         </div>
-                        <div class="stat-card stat-card--emerald p-4 text-center rounded-xl bg-white border border-gray-200 shadow-2xs">
-                            <span class="text-xl">🥚</span>
-                            <p class="text-2xl font-heading font-bold text-emerald-700 mt-1">{{ $counts->get('Eggshells', 0) }}</p>
-                            <p class="text-[0.62rem] text-gray-400 font-body font-semibold uppercase tracking-wider mt-0.5">Eggshells</p>
-                        </div>
-                        <div class="stat-card stat-card--amber p-4 text-center rounded-xl bg-white border border-gray-200 shadow-2xs">
-                            <span class="text-xl">☕</span>
-                            <p class="text-2xl font-heading font-bold text-amber-600 mt-1">{{ $counts->get('Coffee Grounds', 0) }}</p>
-                            <p class="text-[0.62rem] text-gray-400 font-body font-semibold uppercase tracking-wider mt-0.5">Coffee Grounds</p>
-                        </div>
-                    </div>
-                </div>
-                @endif
 
-                {{-- ── Right Column: Waste Log History Table (7 cols) ───────────── --}}
-                <div class="{{ (Auth::user()->can('log_waste') || Auth::user()->isHousehold()) ? 'lg:col-span-7' : 'lg:col-span-12' }} space-y-4">
+                        <form method="POST" action="{{ route('household.waste-logs.store') }}" id="waste-log-form">
+                            @csrf
+                            {{-- Visual Choice Cards for Waste Type --}}
+                            <div class="mb-5">
+                                <div class="space-y-3" x-data="{ selectedType: '{{ old('waste_type', 'Banana Peels') }}' }">
+                                    <label @click="selectedType = 'Banana Peels'" :class="selectedType === 'Banana Peels' ? 'border-amber-500 bg-amber-50/50 ring-1 ring-amber-400' : 'border-gray-200 bg-white'" class="flex items-center justify-between p-3.5 rounded-xl border cursor-pointer transition-all duration-150">
+                                        <div class="flex items-center gap-3">
+                                            <span class="text-2xl p-2 rounded-lg bg-yellow-100/80">🍌</span>
+                                            <div>
+                                                <p class="font-body font-semibold text-sm text-gray-800">Banana Peels</p>
+                                            </div>
+                                        </div>
+                                        <input type="radio" name="waste_type" value="Banana Peels" x-model="selectedType" class="w-4 h-4 text-emerald-600">
+                                    </label>
+
+                                    <label @click="selectedType = 'Eggshells'" :class="selectedType === 'Eggshells' ? 'border-orange-500 bg-orange-50/50 ring-1 ring-orange-400' : 'border-gray-200 bg-white'" class="flex items-center justify-between p-3.5 rounded-xl border cursor-pointer transition-all duration-150">
+                                        <div class="flex items-center gap-3">
+                                            <span class="text-2xl p-2 rounded-lg bg-orange-100/80">🥚</span>
+                                            <div>
+                                                <p class="font-body font-semibold text-sm text-gray-800">Eggshells</p>
+                                            </div>
+                                        </div>
+                                        <input type="radio" name="waste_type" value="Eggshells" x-model="selectedType" class="w-4 h-4 text-emerald-600">
+                                    </label>
+
+                                    <label @click="selectedType = 'Coffee Grounds'" :class="selectedType === 'Coffee Grounds' ? 'border-amber-700 bg-amber-50/70 ring-1 ring-amber-600' : 'border-gray-200 bg-white'" class="flex items-center justify-between p-3.5 rounded-xl border cursor-pointer transition-all duration-150">
+                                        <div class="flex items-center gap-3">
+                                            <span class="text-2xl p-2 rounded-lg bg-amber-100/80">☕</span>
+                                            <div>
+                                                <p class="font-body font-semibold text-sm text-gray-800">Coffee Grounds</p>
+                                            </div>
+                                        </div>
+                                        <input type="radio" name="waste_type" value="Coffee Grounds" x-model="selectedType" class="w-4 h-4 text-emerald-600">
+                                    </label>
+                                </div>
+                                @error('waste_type')<p class="mt-2 text-xs text-red-600 font-body">{{ $message }}</p>@enderror
+                            </div>
+
+                            <div class="mb-5 grid grid-cols-3 gap-3">
+                                <div class="col-span-2">
+                                    <label for="quantity" class="block text-xs font-semibold uppercase text-gray-500 mb-1.5">Quantity</label>
+                                    <input id="quantity" type="number" name="quantity" step="0.01" min="0.01" value="{{ old('quantity') }}" class="w-full rounded-xl border-gray-200 focus:ring-emerald-400 shadow-2xs">
+                                </div>
+                                <div>
+                                    <label for="unit" class="block text-xs font-semibold uppercase text-gray-500 mb-1.5">Unit</label>
+                                    <select id="unit" name="unit" class="w-full rounded-xl border-gray-200 focus:ring-emerald-400 shadow-2xs">
+                                        <option value="kg">kg</option>
+                                        <option value="g">g</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <button type="submit" class="w-full bg-emerald-600 text-white rounded-xl px-5 py-3 text-sm font-bold shadow hover:bg-emerald-700 transition">
+                                Add to Inventory
+                            </button>
+                        </form>
+                    </div>
+                    @endif
+                </div>
+
+                {{-- ── Right Column: Log History ───────────── --}}
+                <div class="lg:col-span-7 space-y-4">
                     <div class="flex items-center justify-between mb-1">
                         <div>
                             <p class="section-label">Log History</p>
-                            <h3 class="font-heading text-xl font-bold text-gray-800 mt-0.5">My Recorded Waste Logs</h3>
+                            <h3 class="font-heading text-xl font-bold text-gray-800 mt-0.5">Transactions</h3>
                         </div>
-                        <span class="text-xs text-gray-500 font-body">
-                            Total: <strong class="text-gray-800 font-semibold">{{ $wasteLogs->count() }}</strong> entries
-                        </span>
                     </div>
 
                     @if($wasteLogs->isEmpty())
                         <div class="card-dark p-12 flex flex-col items-center justify-center text-center">
-                            <div class="w-16 h-16 rounded-2xl bg-emerald-50 border border-emerald-100 flex items-center justify-center mb-4 shadow-2xs">
-                                <span class="text-3xl">🌿</span>
-                            </div>
-                            <h4 class="font-heading font-bold text-gray-800 text-lg">No Waste Logged Yet</h4>
-                            <p class="text-sm text-gray-500 font-body mt-1.5 max-w-sm leading-relaxed">
-                                Select an organic waste type on the left to start converting your kitchen scraps into valuable fertilizer recipes.
-                            </p>
+                            <h4 class="font-heading font-bold text-gray-800 text-lg">No Transactions Yet</h4>
                         </div>
                     @else
                         <div class="card-dark overflow-hidden shadow-2xs">
@@ -347,41 +226,30 @@
                                 <table class="w-full text-left border-collapse">
                                     <thead>
                                         <tr class="bg-gray-50/80 border-b border-gray-200">
-                                            <th class="px-5 py-3.5 text-[0.7rem] font-body font-bold uppercase tracking-wider text-gray-400">#</th>
-                                            <th class="px-5 py-3.5 text-[0.7rem] font-body font-bold uppercase tracking-wider text-gray-400">Waste Item</th>
-                                            <th class="px-5 py-3.5 text-[0.7rem] font-body font-bold uppercase tracking-wider text-gray-400">Amount</th>
-                                            <th class="px-5 py-3.5 text-[0.7rem] font-body font-bold uppercase tracking-wider text-gray-400">Date Recorded</th>
-                                            <th class="px-5 py-3.5 text-[0.7rem] font-body font-bold uppercase tracking-wider text-gray-400 text-right">Relative</th>
+                                            <th class="px-5 py-3.5 text-[0.7rem] font-bold uppercase text-gray-400">Type</th>
+                                            <th class="px-5 py-3.5 text-[0.7rem] font-bold uppercase text-gray-400">Item</th>
+                                            <th class="px-5 py-3.5 text-[0.7rem] font-bold uppercase text-gray-400">Amount</th>
+                                            <th class="px-5 py-3.5 text-[0.7rem] font-bold uppercase text-gray-400">Date</th>
                                         </tr>
                                     </thead>
                                     <tbody class="divide-y divide-gray-100 bg-white">
-                                        @foreach($wasteLogs as $index => $log)
-                                            @php
-                                                $badge = match($log->waste_type) {
-                                                    'Banana Peels'   => ['class' => 'bg-yellow-50 text-yellow-800 border-yellow-200', 'icon' => '🍌'],
-                                                    'Eggshells'      => ['class' => 'bg-orange-50 text-orange-800 border-orange-200', 'icon' => '🥚'],
-                                                    'Coffee Grounds' => ['class' => 'bg-amber-50 text-amber-800 border-amber-200', 'icon' => '☕'],
-                                                    default          => ['class' => 'bg-gray-50 text-gray-700 border-gray-200', 'icon' => '🍃'],
-                                                };
-                                            @endphp
-                                            <tr class="row-glow hover:bg-gray-50/60 transition-colors">
-                                                <td class="px-5 py-4 text-xs font-mono text-gray-400">
-                                                    {{ sprintf('%02d', $index + 1) }}
-                                                </td>
+                                        @foreach($wasteLogs as $log)
+                                            <tr class="hover:bg-gray-50/60">
                                                 <td class="px-5 py-4">
-                                                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold border {{ $badge['class'] }}">
-                                                        <span>{{ $badge['icon'] }}</span>
-                                                        {{ $log->waste_type }}
-                                                    </span>
+                                                    @if($log->transaction_type === 'added')
+                                                        <span class="px-2 py-1 text-xs font-bold rounded-full bg-blue-100 text-blue-700">+ Added</span>
+                                                    @else
+                                                        <span class="px-2 py-1 text-xs font-bold rounded-full bg-red-100 text-red-700">- Used</span>
+                                                    @endif
                                                 </td>
-                                                <td class="px-5 py-4 text-sm font-semibold text-gray-800 font-body">
-                                                    {{ $log->quantity ? ($log->quantity + 0) . ' ' . ($log->unit ?? 'kg') : '—' }}
+                                                <td class="px-5 py-4 text-sm font-semibold">
+                                                    {{ $log->waste_type }}
                                                 </td>
-                                                <td class="px-5 py-4 text-sm text-gray-700 font-body">
+                                                <td class="px-5 py-4 text-sm font-bold text-gray-800">
+                                                    {{ $log->quantity + 0 }} {{ $log->unit }}
+                                                </td>
+                                                <td class="px-5 py-4 text-sm text-gray-500">
                                                     {{ $log->date_recorded ? $log->date_recorded->format('M d, Y') : now()->format('M d, Y') }}
-                                                </td>
-                                                <td class="px-5 py-4 text-xs text-gray-400 font-body text-right">
-                                                    {{ $log->created_at ? $log->created_at->diffForHumans() : 'Just now' }}
                                                 </td>
                                             </tr>
                                         @endforeach
@@ -393,7 +261,101 @@
                 </div>
 
             </div>{{-- /grid --}}
+        </div>
+        
+        {{-- Floating AI Assistant Widget --}}
+        <div class="fixed bottom-6 right-6 z-50 flex flex-col items-end">
+            <!-- Chat Window -->
+            <div x-show="chatOpen" style="display: none; height: 500px; max-height: 70vh;" class="mb-4 w-80 sm:w-96 bg-white rounded-2xl shadow-2xl border border-gray-200 overflow-hidden flex flex-col">
+                <!-- Header -->
+                <div class="bg-gradient-to-r from-emerald-800 to-teal-700 p-4 text-white flex items-center justify-between shadow-md z-10">
+                    <div class="flex items-center gap-2">
+                        <span class="text-xl">🤖</span>
+                        <h3 class="font-bold font-heading">EcoFert AI Assistant</h3>
+                    </div>
+                    <button @click="chatOpen = false" class="text-emerald-200 hover:text-white">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                    </button>
+                </div>
+                
+                <!-- Messages -->
+                <div class="flex-1 overflow-y-auto p-4 bg-gray-50/50 space-y-4" id="chat-messages-container">
+                    <template x-for="(msg, index) in chatMessages" :key="index">
+                        <div :class="msg.role === 'user' ? 'flex justify-end' : 'flex justify-start'">
+                            <div :class="msg.role === 'user' ? 'bg-emerald-600 text-white rounded-l-xl rounded-tr-xl' : 'bg-white border border-gray-200 text-gray-800 rounded-r-xl rounded-tl-xl'" class="px-4 py-2.5 max-w-[85%] shadow-sm text-sm font-body whitespace-pre-line" x-text="msg.content"></div>
+                        </div>
+                    </template>
+                    <div x-show="sending" class="flex justify-start">
+                        <div class="bg-white border border-gray-200 text-gray-500 rounded-r-xl rounded-tl-xl px-4 py-2.5 shadow-sm text-xs flex items-center gap-2">
+                            <span class="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce"></span>
+                            <span class="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style="animation-delay: 0.2s"></span>
+                            <span class="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style="animation-delay: 0.4s"></span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Input -->
+                <div class="p-3 bg-white border-t border-gray-200">
+                    <form @submit.prevent="
+                        if(!chatInput.trim() || sending) return;
+                        chatMessages.push({role: 'user', content: chatInput});
+                        let input = chatInput;
+                        chatInput = '';
+                        sending = true;
+                        
+                        setTimeout(() => {
+                            let container = document.getElementById('chat-messages-container');
+                            container.scrollTop = container.scrollHeight;
+                        }, 50);
+                        
+                        fetch('{{ route('household.chat.send') }}', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                            },
+                            body: JSON.stringify({message: input})
+                        })
+                        .then(res => res.json())
+                        .then(data => {
+                            chatMessages.push(data.message);
+                            sending = false;
+                            setTimeout(() => {
+                                let container = document.getElementById('chat-messages-container');
+                                container.scrollTop = container.scrollHeight;
+                            }, 50);
+                        })
+                        .catch(err => {
+                            sending = false;
+                            chatMessages.push({role: 'model', content: 'Error connecting to AI service.'});
+                        });
+                    " class="flex items-center gap-2">
+                        <input type="text" x-model="chatInput" placeholder="Ask about composting..." class="flex-1 rounded-xl border border-gray-300 px-3 py-2 text-sm focus:ring-emerald-500 focus:border-emerald-500">
+                        <button type="submit" :disabled="sending" class="p-2 bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 disabled:opacity-50">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5"/></svg>
+                        </button>
+                    </form>
+                </div>
+            </div>
 
+            <!-- Floating Button -->
+            <button @click="
+                chatOpen = !chatOpen; 
+                if(chatOpen && chatMessages.length === 0) {
+                    fetch('{{ route('household.chat.history') }}')
+                        .then(res => res.json())
+                        .then(data => {
+                            chatMessages = data;
+                            setTimeout(() => {
+                                let container = document.getElementById('chat-messages-container');
+                                container.scrollTop = container.scrollHeight;
+                            }, 50);
+                        });
+                }
+            " class="w-14 h-14 bg-emerald-600 rounded-full shadow-lg flex items-center justify-center text-white hover:bg-emerald-700 hover:scale-105 transition transform">
+                <svg x-show="!chatOpen" class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12.76c0 1.6 1.123 2.994 2.707 3.227 1.087.16 2.185.283 3.293.369V21l4.184-4.183a1.14 1.14 0 01.778-.332 48.294 48.294 0 005.83-.498c1.585-.233 2.708-1.626 2.708-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z"/></svg>
+                <svg x-show="chatOpen" class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="display: none;"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"/></svg>
+            </button>
         </div>
     </div>
 </x-admin-layout>
