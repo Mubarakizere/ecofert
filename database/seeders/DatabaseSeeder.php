@@ -16,7 +16,7 @@ class DatabaseSeeder extends Seeder
     {
         $this->call([
             RolesAndPermissionsSeeder::class,
-            // ApprovedFormulationSeeder::class,  // Removed: formulations should be created by extension officers
+            ApprovedFormulationSeeder::class,
         ]);
     }
 }
