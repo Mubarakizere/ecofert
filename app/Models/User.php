@@ -25,6 +25,7 @@ class User extends Authenticatable
         'role_type',
         'email',
         'avatar',
+        'status',
         'password',
     ];
 
@@ -134,6 +135,22 @@ class User extends Authenticatable
     public function hasAdminAccess(): bool
     {
         return in_array($this->role_type, ['Admin', 'Extension Officer']);
+    }
+
+    /**
+     * Check if the user account is suspended.
+     */
+    public function isSuspended(): bool
+    {
+        return $this->status === 'suspended';
+    }
+
+    /**
+     * Check if the user account is active.
+     */
+    public function isActive(): bool
+    {
+        return $this->status === 'active';
     }
 }
 

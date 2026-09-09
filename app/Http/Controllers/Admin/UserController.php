@@ -34,6 +34,11 @@ class UserController extends Controller
             $query->where('role_type', $roleFilter);
         }
 
+        if ($request->filled('status')) {
+            $statusFilter = $request->input('status');
+            $query->where('status', $statusFilter);
+        }
+
         $users = $query->get();
         $roles = Role::orderBy('name')->pluck('name');
 
@@ -67,6 +72,7 @@ class UserController extends Controller
             'email'     => $validated['email'],
             'role_type' => $validated['role'],
             'password'  => Hash::make($validated['password']),
+            'status'    => 'active',
         ]);
 
         $user->assignRole($validated['role']);
@@ -93,5 +99,45 @@ class UserController extends Controller
         return redirect()
             ->route('admin.users.index')
             ->with('success', "Role for {$user->name} updated to {$validated['role_type']}.");
+    }
+
+    /**
+     * Toggle a user account's status between active and suspended.
+     */
+    public function toggleStatus(User $user): RedirectResponse
+    {
+        if ($user->id === auth()->id()) {
+            return redirect()
+                ->route('admin.users.index')
+                ->with('error', 'You cannot suspend your own account.');
+        }
+
+        $user->status = $user->status === 'suspended' ? 'active' : 'suspended';
+        $user->save();
+
+        $action = $user->status === 'suspended' ? 'suspended' : 'reactivated';
+
+        return redirect()
+            ->route('admin.users.index')
+            ->with('success', "User account '{$user->name}' has been {$action} successfully.");
+    }
+
+    /**
+     * Delete a user account from the system.
+     */
+    public function destroy(User $user): RedirectResponse
+    {
+        if ($user->id === auth()->id()) {
+            return redirect()
+                ->route('admin.users.index')
+                ->with('error', 'You cannot delete your own account.');
+        }
+
+        $userName = $user->name;
+        $user->delete();
+
+        return redirect()
+            ->route('admin.users.index')
+            ->with('success', "User account '{$userName}' has been deleted successfully.");
     }
 }

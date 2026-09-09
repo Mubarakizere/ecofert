@@ -147,8 +147,9 @@ Route::middleware(['auth', 'verified', 'admin'])
             ));
         })->name('dashboard');
 
-        Route::resource('users', UserController::class)->only(['index', 'create', 'store']);
+        Route::resource('users', UserController::class)->only(['index', 'create', 'store', 'destroy']);
         Route::patch('users/{user}/role', [UserController::class, 'updateRole'])->name('users.update-role');
+        Route::patch('users/{user}/toggle-status', [UserController::class, 'toggleStatus'])->name('users.toggle-status');
     });
 
 require __DIR__.'/auth.php';
