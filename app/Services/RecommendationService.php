@@ -8,15 +8,6 @@ use Illuminate\Support\Collection;
 
 class RecommendationService
 {
-    /**
-     * Evaluate the user's current waste stock against all approved formulations.
-     *
-     * Returns a collection of formulations enriched with rule-matching status:
-     * - status: 'ready' | 'partial' | 'insufficient'
-     * - producible_batches: integer
-     * - ingredient_breakdown: array of required vs available items
-     * - missing_items: array of items needed to complete 1 batch
-     */
     public function evaluateStockForUser(User $user): Collection
     {
         $stocks = $user->wasteStocks()->get()->keyBy('waste_type');
@@ -47,7 +38,7 @@ class RecommendationService
                 $missing = max(0, $reqQty - $availQty);
                 $ratio = $reqQty > 0 ? ($availQty / $reqQty) : 0;
                 $coverage = min(100, (int) round($ratio * 100));
-                
+
                 $possibleForThisItem = $reqQty > 0 ? (int) floor($availQty / $reqQty) : 0;
                 if ($possibleForThisItem < $maxPossibleBatches) {
                     $maxPossibleBatches = $possibleForThisItem;
