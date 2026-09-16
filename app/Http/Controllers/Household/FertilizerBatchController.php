@@ -22,6 +22,13 @@ class FertilizerBatchController extends Controller
             ->latest('start_date')
             ->get();
 
+        // Auto-mark aging batches as "ready" when fermentation days are complete
+        foreach ($batches as $batch) {
+            if ($batch->status === 'aging' && $batch->isReady()) {
+                $batch->update(['status' => 'ready']);
+            }
+        }
+
         $recommendations = $recommendationService->evaluateStockForUser($user);
 
         return view('household.batches.index', compact('batches', 'recommendations'));
@@ -114,6 +121,11 @@ class FertilizerBatchController extends Controller
         $validated = $request->validate([
             'status' => ['required', 'in:aging,ready,applied,discarded'],
         ]);
+
+        // Prevent marking as "ready" if fermentation days are not yet complete
+        if ($validated['status'] === 'ready' && $batch->status === 'aging' && !$batch->isReady()) {
+            return redirect()->back()->with('error', "Batch {$batch->batch_code} cannot be marked ready — fermentation is still in progress.");
+        }
 
         $batch->update(['status' => $validated['status']]);
 

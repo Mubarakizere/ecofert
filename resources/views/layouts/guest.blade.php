@@ -20,7 +20,7 @@
 
             <!-- Left Executive Identity Panel (Desktop) -->
             <div class="hidden lg:flex lg:w-[45%] xl:w-[40%] bg-slate-900 text-white relative overflow-hidden flex-col justify-between p-12 border-r border-slate-800">
-                
+
                 <div class="space-y-6 relative z-10">
                     <a href="{{ url('/') }}" class="flex items-center gap-3">
                         <div class="w-10 h-10 rounded-xl bg-emerald-600 flex items-center justify-center text-white font-bold text-xl shadow-md">
@@ -71,7 +71,7 @@
 
             <!-- Right Form Container -->
             <div class="flex-1 flex flex-col justify-center items-center p-6 sm:p-12 bg-slate-50">
-                
+
                 <!-- Mobile Brand Header -->
                 <div class="lg:hidden mb-8 flex items-center gap-3">
                     <div class="w-10 h-10 rounded-xl bg-emerald-600 flex items-center justify-center text-white font-bold text-xl shadow">

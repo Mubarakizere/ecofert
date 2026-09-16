@@ -89,7 +89,8 @@
                                 </div>
 
                                 <div class="flex items-center gap-2">
-                                    @if($batch->status === 'aging')
+                                    {{-- Only show "Mark Ready" when aging AND fermentation days are complete --}}
+                                    @if($batch->status === 'aging' && $batch->isReady())
                                         <form action="{{ route('household.batches.update-status', $batch->batch_id) }}" method="POST">
                                             @csrf
                                             @method('PATCH')
@@ -100,24 +101,80 @@
                                         </form>
                                     @endif
 
-                                    @if(in_array($batch->status, ['aging', 'ready']))
-                                        <form action="{{ route('household.batches.update-status', $batch->batch_id) }}" method="POST">
-                                            @csrf
-                                            @method('PATCH')
-                                            <input type="hidden" name="status" value="applied">
-                                            <button type="submit" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-900 text-white text-xs font-semibold rounded-lg transition">
-                                                Mark Applied
-                                            </button>
-                                        </form>
+                                    {{-- Only allow "Mark Applied" when batch is actually ready --}}
+                                    @if($batch->status === 'ready' || ($batch->status === 'aging' && $batch->isReady()))
+                                        <button type="button"
+                                            onclick="document.getElementById('apply-modal-{{ $batch->batch_id }}').classList.remove('hidden')"
+                                            class="px-3 py-1.5 bg-slate-800 hover:bg-slate-900 text-white text-xs font-semibold rounded-lg transition">
+                                            Mark Applied
+                                        </button>
                                     @endif
                                 </div>
                             </div>
 
                         </div>
+
+                        {{-- Confirm Apply Modal --}}
+                        @if($batch->status === 'ready' || ($batch->status === 'aging' && $batch->isReady()))
+                            <div id="apply-modal-{{ $batch->batch_id }}" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4">
+                                {{-- Backdrop --}}
+                                <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"
+                                     onclick="document.getElementById('apply-modal-{{ $batch->batch_id }}').classList.add('hidden')"></div>
+
+                                {{-- Modal Content --}}
+                                <div class="relative bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-md p-6 space-y-5 animate-fade-in">
+                                    <div class="flex items-center gap-3">
+                                        <div class="flex-shrink-0 w-10 h-10 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                                            </svg>
+                                        </div>
+                                        <div>
+                                            <h3 class="text-lg font-bold text-slate-900">Confirm Application</h3>
+                                            <p class="text-sm text-slate-500">This action cannot be undone.</p>
+                                        </div>
+                                    </div>
+
+                                    <p class="text-sm text-slate-600">
+                                        Are you sure you want to mark batch
+                                        <span class="font-mono font-bold text-slate-900">{{ $batch->batch_code }}</span>
+                                        as <span class="font-semibold text-emerald-700">Applied to Plants</span>?
+                                    </p>
+
+                                    <div class="flex items-center justify-end gap-3 pt-2">
+                                        <button type="button"
+                                            onclick="document.getElementById('apply-modal-{{ $batch->batch_id }}').classList.add('hidden')"
+                                            class="px-4 py-2 text-sm font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg transition">
+                                            Cancel
+                                        </button>
+                                        <form action="{{ route('household.batches.update-status', $batch->batch_id) }}" method="POST">
+                                            @csrf
+                                            @method('PATCH')
+                                            <input type="hidden" name="status" value="applied">
+                                            <button type="submit" class="px-4 py-2 text-sm font-semibold text-white bg-slate-800 hover:bg-slate-900 rounded-lg transition">
+                                                Yes, Mark Applied
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        @endif
                     @endforeach
                 </div>
             @endif
 
         </div>
     </div>
+
+    {{-- Modal animation --}}
+    <style>
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        .animate-fade-in {
+            animation: fadeIn 0.2s ease-out;
+        }
+    </style>
+
 </x-app-layout>

@@ -10,7 +10,8 @@
                 </p>
             </div>
             <div class="flex items-center gap-3">
-                <a href="{{ route('admin.users.create') }}" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold rounded-lg shadow-sm transition">
+                <a href="{{ route('admin.users.create') }}"
+                    class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold rounded-lg shadow-sm transition">
                     Create User Account
                 </a>
             </div>
@@ -25,46 +26,59 @@
 
             <!-- System Statistics Row -->
             <div class="grid grid-cols-1 sm:grid-cols-4 gap-6">
-                <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
+                <div
+                    class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
                     <div>
                         <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Total Accounts</span>
                         <h3 class="text-3xl font-bold text-slate-900 mt-1">{{ $userCount }}</h3>
                         <p class="text-xs text-slate-500 mt-1">Platform user credentials</p>
                     </div>
-                    <div class="w-12 h-12 rounded-xl bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-700 font-bold">
+                    <div
+                        class="w-12 h-12 rounded-xl bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-700 font-bold">
                         UA
                     </div>
                 </div>
 
-                <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
+                <div
+                    class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
                     <div>
                         <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Households</span>
                         <h3 class="text-3xl font-bold text-emerald-700 mt-1">{{ $householdCount }}</h3>
                         <p class="text-xs text-slate-500 mt-1">Cooperative waste loggers</p>
                     </div>
-                    <div class="w-12 h-12 rounded-xl bg-emerald-50 border border-emerald-100 flex items-center justify-center text-emerald-700 font-bold">
+                    <div
+                        class="w-12 h-12 rounded-xl bg-emerald-50 border border-emerald-100 flex items-center justify-center text-emerald-700 font-bold">
                         HH
                     </div>
                 </div>
 
-                <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
+                <div
+                    class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
                     <div>
-                        <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Extension Officers</span>
+                        <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Extension
+                            Officers</span>
                         <h3 class="text-3xl font-bold text-amber-700 mt-1">{{ $officerCount }}</h3>
                         <p class="text-xs text-slate-500 mt-1">Agricultural advisors</p>
                     </div>
-                    <div class="w-12 h-12 rounded-xl bg-amber-50 border border-amber-100 flex items-center justify-center text-amber-700 font-bold">
+                    <div
+                        class="w-12 h-12 rounded-xl bg-amber-50 border border-amber-100 flex items-center justify-center text-amber-700 font-bold">
                         EO
                     </div>
                 </div>
 
-                <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
+                <div
+                    class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
                     <div>
-                        <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Total Waste Logged</span>
-                        <h3 class="text-3xl font-bold text-slate-900 mt-1">{{ $wasteAnalytics['totals']['aggregate'] }}<span class="text-sm font-normal text-slate-500">kg</span></h3>
+                        <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Total Waste
+                            Logged</span>
+                        <h3 class="text-3xl font-bold text-slate-900 mt-1">
+                            {{ $wasteAnalytics['totals']['aggregate'] }}<span
+                                class="text-sm font-normal text-slate-500">kg</span>
+                        </h3>
                         <p class="text-xs text-slate-500 mt-1">Valorised food waste</p>
                     </div>
-                    <div class="w-12 h-12 rounded-xl bg-blue-50 border border-blue-100 flex items-center justify-center text-blue-700 font-bold">
+                    <div
+                        class="w-12 h-12 rounded-xl bg-blue-50 border border-blue-100 flex items-center justify-center text-blue-700 font-bold">
                         KG
                     </div>
                 </div>
@@ -72,13 +86,14 @@
 
             <!-- Analytics Charts Grid (Row 1) -->
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                
+
                 <!-- Chart 1: Food Waste Collection Breakdown -->
                 <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 space-y-4">
                     <div class="flex items-center justify-between border-b border-slate-100 pb-3">
                         <div>
                             <h3 class="text-base font-bold text-slate-900">Food Waste Valorisation by Material Type</h3>
-                            <p class="text-xs text-slate-500">Musanze/Nyabihu district cooperative waste deposits (kg)</p>
+                            <p class="text-xs text-slate-500">Musanze/Nyabihu district cooperative waste deposits (kg)
+                            </p>
                         </div>
                         <span class="text-xs font-mono font-semibold px-2 py-1 bg-slate-100 text-slate-700 rounded">
                             Aggregate: {{ $wasteAnalytics['totals']['aggregate'] }}kg
@@ -91,15 +106,18 @@
 
                     <div class="grid grid-cols-3 gap-2 pt-2 text-center text-xs border-t border-slate-100">
                         <div class="p-2 rounded bg-amber-50 border border-amber-100">
-                            <span class="text-amber-800 font-bold block">{{ $wasteAnalytics['totals']['banana'] }} kg</span>
+                            <span class="text-amber-800 font-bold block">{{ $wasteAnalytics['totals']['banana'] }}
+                                kg</span>
                             <span class="text-slate-500">Banana Peels (K)</span>
                         </div>
                         <div class="p-2 rounded bg-stone-50 border border-stone-200">
-                            <span class="text-stone-800 font-bold block">{{ $wasteAnalytics['totals']['eggshell'] }} kg</span>
+                            <span class="text-stone-800 font-bold block">{{ $wasteAnalytics['totals']['eggshell'] }}
+                                kg</span>
                             <span class="text-slate-500">Eggshells (Ca)</span>
                         </div>
                         <div class="p-2 rounded bg-emerald-50 border border-emerald-100">
-                            <span class="text-emerald-800 font-bold block">{{ $wasteAnalytics['totals']['coffee'] }} kg</span>
+                            <span class="text-emerald-800 font-bold block">{{ $wasteAnalytics['totals']['coffee'] }}
+                                kg</span>
                             <span class="text-slate-500">Coffee Grounds (N)</span>
                         </div>
                     </div>
@@ -110,9 +128,11 @@
                     <div class="flex items-center justify-between border-b border-slate-100 pb-3">
                         <div>
                             <h3 class="text-base font-bold text-slate-900">4-Week Plant Growth Trajectory</h3>
-                            <p class="text-xs text-slate-500">Average plant height progression: Organic vs Commercial Control (cm)</p>
+                            <p class="text-xs text-slate-500">Average plant height progression: Organic vs Commercial
+                                Control (cm)</p>
                         </div>
-                        <span class="text-xs font-mono font-semibold px-2 py-1 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded">
+                        <span
+                            class="text-xs font-mono font-semibold px-2 py-1 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded">
                             Trial Comparison
                         </span>
                     </div>
@@ -137,22 +157,28 @@
 
             <!-- Quick Management Navigation Cards -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 flex items-center justify-between">
+                <div
+                    class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 flex items-center justify-between">
                     <div>
                         <h3 class="text-base font-bold text-slate-900">User Account Provisioning & Roles</h3>
-                        <p class="text-xs text-slate-500 mt-1">Manage user credentials, grant Spatie roles, and inspect system permissions.</p>
+                        <p class="text-xs text-slate-500 mt-1">Manage user credentials, grant Spatie roles, and inspect
+                            system permissions.</p>
                     </div>
-                    <a href="{{ route('admin.users.index') }}" class="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold rounded-lg shadow-sm transition">
+                    <a href="{{ route('admin.users.index') }}"
+                        class="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold rounded-lg shadow-sm transition">
                         Manage Users &rarr;
                     </a>
                 </div>
 
-                <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 flex items-center justify-between">
+                <div
+                    class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 flex items-center justify-between">
                     <div>
                         <h3 class="text-base font-bold text-slate-900">Cooperative Farmer Experiments Log</h3>
-                        <p class="text-xs text-slate-500 mt-1">Review plant trial measurements and height delta reports across member gardens.</p>
+                        <p class="text-xs text-slate-500 mt-1">Review plant trial measurements and height delta reports
+                            across member gardens.</p>
                     </div>
-                    <a href="{{ route('officer.experiments.index') }}" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded-lg shadow-sm transition">
+                    <a href="{{ route('officer.experiments.index') }}"
+                        class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded-lg shadow-sm transition">
                         Review Trials &rarr;
                     </a>
                 </div>
